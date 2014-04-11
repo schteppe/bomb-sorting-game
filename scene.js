@@ -4,6 +4,7 @@ require([
 	'goo/renderer/Camera',
 	'goo/entities/components/CameraComponent',
 	'goo/shapes/Sphere',
+	'goo/shapes/Cylinder',
 	'goo/shapes/Box',
 	'goo/shapes/Quad',
 	'goo/renderer/TextureCreator',
@@ -30,6 +31,7 @@ require([
 	Camera,
 	CameraComponent,
 	Sphere,
+	Cylinder,
 	Box,
 	Quad,
 	TextureCreator,
@@ -103,7 +105,6 @@ require([
 	var materialB = getColoredMaterial(0,1,0);
 
 	function spawnBox(){
-		console.log("spawn")
 		var x = (Math.random()-0.5) * areaDepth * 0.5;
 		var y = 8;
 		var z = (Math.random()-0.5) * (areaWidth - containerWidth*2);
@@ -116,13 +117,55 @@ require([
 
 		var rigidBodyComponent = new CannonRigidbodyComponent();
 		var radius = 2 + Math.random();
-		var entity = createEntity(new Box(radius,radius,radius), material).set([x, y, z]);
+		var sphere = new Sphere(8,8,radius*0.5);
+
+		var box = new Box(radius,radius,radius);
+		var entity = createEntity(sphere, material).set([x, y, z]);
 		var boxColliderComponent = new CannonBoxColliderComponent({
 			halfExtents:new Vector3(radius*0.5,radius*0.5,radius*0.5)
 		});
 		entity.setComponent(rigidBodyComponent);
 		entity.setComponent(boxColliderComponent);
 		entity.addToWorld();
+
+		var cylinder = new Cylinder(8,radius*0.22);
+		var grayMat = getColoredMaterial(0.5,0.5,0.5);
+		var blackMat = getColoredMaterial(0,0,0);
+		var cylinderEntity = createEntity(cylinder, grayMat).set([0,radius*0.5,0]);
+		cylinderEntity.setRotation([Math.PI/2,0,0]);
+		cylinderEntity.setScale([1,1,radius*0.35]);
+		entity.attachChild(cylinderEntity);
+		cylinderEntity.addToWorld();
+
+		var offset = radius*0.35;
+
+		var miniSphere = new Sphere(8,8,radius*0.2);
+		var miniSphereEntity1 = createEntity(miniSphere, grayMat).set([-offset,-offset,-offset]);
+		entity.attachChild(miniSphereEntity1);
+		miniSphereEntity1.addToWorld();
+
+		var miniSphereEntity2 = createEntity(miniSphere, grayMat).set([-offset,-offset,offset]);
+		entity.attachChild(miniSphereEntity2);
+		miniSphereEntity2.addToWorld();
+
+		var miniSphereEntity3 = createEntity(miniSphere, grayMat).set([offset,-offset,offset]);
+		entity.attachChild(miniSphereEntity3);
+		miniSphereEntity3.addToWorld();
+
+		var miniSphereEntity4 = createEntity(miniSphere, grayMat).set([offset,-offset,-offset]);
+		entity.attachChild(miniSphereEntity4);
+		miniSphereEntity4.addToWorld();
+
+		var eye1 = createEntity(miniSphere, blackMat).set([radius*0.45,0,radius*0.2]);
+		entity.attachChild(eye1);
+		eye1.setScale([0.2,0.8,0.2]);
+		eye1.addToWorld();
+
+		var eye2 = createEntity(miniSphere, blackMat).set([radius*0.45,0,-radius*0.2]);
+		entity.attachChild(eye2);
+		eye2.setScale([0.2,0.8,0.2]);
+		eye2.addToWorld();
+
 		entity.gameType = gameType;
 		entity.spawnTime = Date.now();
 	}
